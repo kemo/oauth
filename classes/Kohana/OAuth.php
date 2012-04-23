@@ -69,8 +69,10 @@ abstract class Kohana_OAuth {
 
 		if (isset($error))
 		{
-			throw new Kohana_OAuth_Exception('Error fetching remote :url [ status :code ] :error',
-				array(':url' => $url, ':code' => $code, ':error' => $error));
+			throw new Kohana_OAuth_Request_Exception('Error fetching remote :url [ status :code ] :error',
+				array(':url' => $url, ':code' => $code, ':error' => $error),
+				$code,
+				$response);
 		}
 
 		return $response;
@@ -173,7 +175,7 @@ abstract class Kohana_OAuth {
 			{
 				// OAuth Spec 9.1.1 (1)
 				// "If two or more parameters share the same name, they are sorted by their value."
-				$value = natsort($value);
+				natsort($value);
 
 				foreach ($value as $duplicate)
 				{

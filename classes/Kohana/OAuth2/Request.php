@@ -29,6 +29,36 @@ abstract class Kohana_OAuth2_Request extends OAuth_Request {
 	/**
 	 * @var  boolean  send Authorization header?
 	 */
-	public $send_header = FALSE;
+	public $send_header = TRUE;
+
+	protected $auth_params = '/^access_token$/';
+
+	/**
+	 * Convert the request parameters into an `Authorization` header.
+	 *
+	 *     $header = $request->as_header();
+	 *
+	 * [!!] This method implements [OAuth 2.0 v22 Spec 7.1](http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-7.1).
+	 *
+	 * @return  string
+	 */
+	public function as_header()
+	{
+		if ($access = Arr::get($this->params, 'access_token'))
+		{
+			if (is_string($this->send_header))
+			{
+				$header = $this->send_header;
+			}
+			else
+			{
+				$header = 'Bearer';
+			}
+
+			$access = $header.' '.$access;
+		}
+
+		return $access ? $access : NULL;
+	}
 
 }

@@ -55,6 +55,16 @@ class Kohana_OAuth_Request {
 	protected $url;
 
 	/**
+	 * @var  string  request body
+	 */
+	protected $body;
+
+	/**
+	 * @var  string  OAuth parameters matching regex
+	 */
+	protected $auth_params = '/^oauth_/';
+
+	/**
 	 * @var   array   request parameters
 	 */
 	protected $params = array();
@@ -263,6 +273,13 @@ class Kohana_OAuth_Request {
 		return $this;
 	}
 
+	public function body($body)
+	{
+		$this->body = $body;
+
+		return $this;
+	}
+
 	/**
 	 * Upload getter and setter. Setting the value to `NULL` will remove it.
 	 *
@@ -350,7 +367,7 @@ class Kohana_OAuth_Request {
 			}
 		}
 
-		return 'OAuth '.implode(', ', $header);
+		return $header ? 'OAuth '.implode(', ', $header) : NULL;
 	}
 
 	/**
@@ -383,7 +400,7 @@ class Kohana_OAuth_Request {
 			$params = array();
 			foreach ($this->params as $name => $value)
 			{
-				if (strpos($name, 'oauth_') !== 0)
+				if ( ! preg_match($this->auth_params, $name))
 				{
 					// This is not an OAuth parameter
 					$params[$name] = $value;
@@ -476,39 +493,43 @@ class Kohana_OAuth_Request {
 		// Get the URL of the request
 		$url = $this->url;
 
+		if ($query = $this->as_query())
+		{
+			// Append the parameters to the query string
+			$url = "{$url}?{$query}";
+		}
+
 		if ( ! isset($options[CURLOPT_CONNECTTIMEOUT]))
 		{
 			// Use the request default timeout
 			$options[CURLOPT_CONNECTTIMEOUT] = $this->timeout;
 		}
 
-		if ($this->send_header)
+		if ($this->send_header AND $header = $this->as_header())
 		{
-			// Get the the current headers
-			$headers = Arr::get($options, CURLOPT_HTTPHEADER, array());
-
-			// Add the Authorization header
-			$headers[] = 'Authorization: '.$this->as_header();
-
 			// Store the new headers
-			$options[CURLOPT_HTTPHEADER] = $headers;
+			$options[CURLOPT_HTTPHEADER][] = 'Authorization: '.$header;
 		}
 
-		if ($this->method === 'POST')
-		{
-			// Send the request as a POST
-			$options[CURLOPT_POST] = TRUE;
+		// Set the request method for this request
+		$options[CURLOPT_CUSTOMREQUEST] = $this->method;
 
-			if ($post = $this->as_query(NULL, empty($this->upload)))
+		if ($this->body)
+		{
+			$options[CURLOPT_POSTFIELDS] = $this->body;
+		}
+		elseif ($this->method === 'POST')
+		{
+			if ($post = $this->as_query(empty($header), empty($this->upload)))
 			{
 				// Attach the post fields to the request
 				$options[CURLOPT_POSTFIELDS] = $post;
 			}
 		}
-		elseif ($query = $this->as_query())
+
+		if ($this->body)
 		{
-			// Append the parameters to the query string
-			$url = "{$url}?{$query}";
+			$options[CURLOPT_HTTPHEADER][] = 'Content-Length: '.strlen($this->body);
 		}
 
 		return OAuth::remote($url, $options);
