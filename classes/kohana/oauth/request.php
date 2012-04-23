@@ -332,6 +332,14 @@ class Kohana_OAuth_Request {
 	{
 		$header = array();
 
+		// Check for the existance of "realm"
+		if(array_key_exists('realm', $this->params) and ! empty($this->params['realm']))
+		{
+			// OAuth Spec 5.4.1
+			// "Parameter names and values are encoded per Parameter Encoding [RFC 3986]."
+			$header[] = OAuth::urlencode('realm').'="'.OAuth::urlencode($this->params['realm']).'"';
+		}
+
 		foreach ($this->params as $name => $value)
 		{
 			if (strpos($name, 'oauth_') === 0)

@@ -126,6 +126,7 @@ abstract class Kohana_OAuth_Provider {
 	{
 		// Create a new GET request for a request token with the required parameters
 		$request = OAuth_Request::factory('token', 'GET', $this->url_request_token(), array(
+			'realm'              => $consumer->realm,
 			'oauth_consumer_key' => $consumer->key,
 			'oauth_callback'     => $consumer->callback,
 		));
@@ -188,6 +189,7 @@ abstract class Kohana_OAuth_Provider {
 	{
 		// Create a new GET request for a request token with the required parameters
 		$request = OAuth_Request::factory('access', 'GET', $this->url_access_token(), array(
+			'realm'              => $consumer->realm,
 			'oauth_consumer_key' => $consumer->key,
 			'oauth_token'        => $token->token,
 			'oauth_verifier'     => $token->verifier,

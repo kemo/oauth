@@ -25,7 +25,16 @@ class Kohana_OAuth_Response {
 	{
 		if ($body)
 		{
-			$this->params = OAuth::parse_params($body);
+			if ($params = json_decode($body, TRUE))
+			{
+				// its a JSON string
+				$this->params = $params;
+			}
+			else
+			{
+				// parse as GET string
+				$this->params = OAuth::parse_params($body);
+			}
 		}
 	}
 
@@ -46,6 +55,11 @@ class Kohana_OAuth_Response {
 	public function param($name, $default = NULL)
 	{
 		return Arr::get($this->params, $name, $default);
+	}
+
+	public function params()
+	{
+		return $this->params;
 	}
 
 } // End OAuth_Response
