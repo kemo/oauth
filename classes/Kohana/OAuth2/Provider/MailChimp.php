@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
-abstract class Kohana_OAuth2_Provider_Mailchimp extends OAuth2_Provider {
+abstract class Kohana_OAuth2_Provider_MailChimp extends OAuth2_Provider {
 
 	public $name = 'mailchimp';
 
