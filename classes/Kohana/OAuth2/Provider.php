@@ -53,7 +53,7 @@ abstract class Kohana_OAuth2_Provider {
 		return $request->as_url();
 	}
 
-	public function access_token(OAuth2_Client $client, $code, array $params = NULL)
+	public function access_token(OAuth2_Client $client, $code, array $params = NULL, array $options = NULL)
 	{
 		$request = OAuth2_Request::factory('token', 'POST', $this->url_access_token(), array(
 			'grant_type'    => 'authorization_code',
@@ -73,7 +73,7 @@ abstract class Kohana_OAuth2_Provider {
 			$request->params($params);
 		}
 
-		$response = $request->execute();
+		$response = $request->execute($options);
 
 		return OAuth2_Token::factory('access', array(
 			'token' => $response->param('access_token')
