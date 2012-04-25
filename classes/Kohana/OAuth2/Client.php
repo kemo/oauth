@@ -38,10 +38,18 @@ class Kohana_OAuth2_Client {
 	 */
 	public function __construct(array $options = NULL)
 	{
-		if ( ! isset($options['id']))
+		if (isset($options['id']))
 		{
-			throw new Kohana_OAuth_Exception('Required option not passed: :option',
-				array(':option' => 'id'));
+			$this->id = $options['id'];
+		}
+		elseif (isset($options['key']))
+		{
+			$this->id = $options['key'];
+		}
+		else
+		{
+			throw new Kohana_OAuth_Exception('One of these must be passed: :option',
+				array(':option' => 'id or key'));
 		}
 
 		if ( ! isset($options['secret']))
@@ -49,8 +57,6 @@ class Kohana_OAuth2_Client {
 			throw new Kohana_OAuth_Exception('Required option not passed: :option',
 				array(':option' => 'secret'));
 		}
-
-		$this->id = $options['id'];
 
 		$this->secret = $options['secret'];
 
